@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Gerencial de Errores RIS ATE</title>
+<style>
+:root {
+  --bg:#061525;
+  --panel:#0d2742;
+  --panel2:#12385c;
+  --text:#edf6ff;
+  --muted:#a8c4df;
+  --blue:#38bdf8;
+  --green:#22c55e;
+  --yellow:#f59e0b;
+  --red:#ef4444;
+  --purple:#a855f7;
+  --border:rgba(255,255,255,.14);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:linear-gradient(135deg,#061525,#0b2745 45%,#07192b);
+  color:var(--text);
+}
+.header{
+  padding:24px 28px;
+  background:linear-gradient(135deg,#0f3d66,#071d33);
+  border-bottom:1px solid var(--border);
+}
+.headerTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+}
+h1{margin:0;font-size:28px;line-height:1.15}
+.subtitle{margin:8px 0 0;color:var(--muted);font-size:14px}
+.badge{
+  background:rgba(56,189,248,.15);
+  color:#c8f1ff;
+  border:1px solid rgba(56,189,248,.4);
+  padding:9px 14px;
+  border-radius:999px;
+  font-weight:bold;
+  white-space:nowrap;
+  font-size:13px;
+}
+.main{padding:22px 28px 36px}
+.filters{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(150px,1fr));
+  gap:12px;
+  margin-bottom:18px;
+}
+.filterBox{
+  background:rgba(13,39,66,.85);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:11px;
+}
+label{
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:6px;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+}
+select,input{
+  width:100%;
+  border:1px solid var(--border);
+  background:#071d33;
+  color:white;
+  padding:10px;
+  border-radius:11px;
+  outline:none;
+}
+.actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-bottom:18px;
+}
+button{
+  border:0;
+  background:linear-gradient(135deg,#0ea5e9,#2563eb);
+  color:white;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:bold;
+  cursor:pointer;
+}
+button.secondary{background:#183b5d}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+  margin-bottom:18px;
+}
+.card{
+  background:linear-gradient(160deg,rgba(18,56,92,.96),rgba(13,39,66,.9));
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:17px;
+  box-shadow:0 10px 26px rgba(0,0,0,.22);
+}
+.cardTitle{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
+.cardValue{font-size:31px;font-weight:900;margin-top:8px}
+.cardNote{font-size:11px;color:var(--muted);margin-top:4px}
+.grid{
+  display:grid;
+  grid-template-columns:1.45fr 1fr;
+  gap:18px;
+  margin-bottom:18px;
+}
+.panel{
+  background:rgba(13,39,66,.9);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:18px;
+  box-shadow:0 10px 26px rgba(0,0,0,.18);
+}
+.panel h2{
+  margin:0 0 14px;
+  font-size:17px;
+}
+.chart{
+  height:350px;
+  overflow:auto;
+  padding-right:6px;
+}
+.barRow{
+  display:grid;
+  grid-template-columns:minmax(140px,42%) 1fr 48px;
+  gap:10px;
+  align-items:center;
+  margin-bottom:9px;
+  font-size:12px;
+}
+.name{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:#e6f4ff;
+}
+.track{
+  height:18px;
+  border-radius:999px;
+  background:rgba(255,255,255,.09);
+  overflow:hidden;
+}
+.fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--blue),#2563eb);
+}
+.fill.green{background:linear-gradient(90deg,var(--green),#15803d)}
+.fill.yellow{background:linear-gradient(90deg,var(--yellow),#b45309)}
+.fill.red{background:linear-gradient(90deg,var(--red),#991b1b)}
+.num{text-align:right;font-weight:bold}
+.donutWrap{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:22px;
+  min-height:315px;
+}
+.donut{
+  width:200px;
+  height:200px;
+  border-radius:50%;
+  background:#12385c;
+  position:relative;
+}
+.donut:after{
+  content:"";
+  position:absolute;
+  inset:42px;
+  background:var(--panel);
+  border-radius:50%;
+  border:1px solid var(--border);
+}
+.legend{
+  max-height:305px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+.legendItem{
+  display:grid;
+  grid-template-columns:12px 1fr auto;
+  gap:8px;
+  align-items:center;
+  font-size:12px;
+}
+.dot{width:12px;height:12px;border-radius:50%}
+.tableWrap{
+  max-height:440px;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:16px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+th{
+  position:sticky;
+  top:0;
+  background:#12385c;
+  color:#dff3ff;
+  text-align:left;
+  padding:10px;
+  z-index:1;
+}
+td{
+  padding:9px 10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  vertical-align:top;
+}
+tr:hover{background:rgba(56,189,248,.08)}
+.footer{color:var(--muted);font-size:12px;text-align:right;margin-top:10px}
+.notice{
+  background:rgba(34,197,94,.08);
+  border:1px solid rgba(34,197,94,.25);
+  border-radius:16px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  color:#cdfbd8;
+  font-size:13px;
+}
+@media(max-width:1050px){
+  .filters{grid-template-columns:repeat(2,1fr)}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .header{padding:18px 14px;position:sticky;top:0;z-index:50}
+  .headerTop{flex-direction:column}
+  h1{font-size:20px}
+  .subtitle{font-size:12px}
+  .badge{font-size:11px;padding:7px 10px}
+  .main{padding:14px 10px 26px}
+  .filters{grid-template-columns:1fr;gap:10px}
+  .actions{position:sticky;top:102px;z-index:40;background:rgba(6,21,37,.92);padding:8px 0;justify-content:space-between}
+  button{flex:1;font-size:12px;padding:10px 8px}
+  .cards{grid-template-columns:repeat(2,1fr);gap:10px}
+  .card{padding:13px;border-radius:16px}
+  .cardValue{font-size:24px}
+  .cardTitle,.cardNote{font-size:10px}
+  .panel{padding:14px;border-radius:18px;margin-bottom:14px}
+  .panel h2{font-size:15px}
+  .chart{height:300px}
+  .barRow{grid-template-columns:minmax(110px,45%) 1fr 38px;gap:7px;font-size:11px}
+  .track{height:15px}
+  .donutWrap{flex-direction:column;gap:14px;min-height:auto}
+  .donut{width:160px;height:160px}
+  .donut:after{inset:34px}
+  .legend{width:100%;max-height:230px}
+  .tableWrap{border:0;max-height:none;overflow:visible}
+  table,thead,tbody,tr,td{display:block;width:100%}
+  thead{display:none}
+  tbody tr{background:rgba(18,56,92,.9);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;padding:10px}
+  td{border:0;padding:6px 0;display:grid;grid-template-columns:105px 1fr;gap:8px;font-size:11px;word-break:break-word}
+  td:before{content:attr(data-label);font-weight:bold;color:#9fdcff}
+  .footer{text-align:left}
+}
+@media(max-width:420px){
+  .cards{grid-template-columns:1fr}
+  td{grid-template-columns:90px 1fr}
+}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="headerTop">
+    <div>
+      <h1>Dashboard Gerencial de Errores Identificados</h1>
+      <p class="subtitle">Análisis dinámico por ATIENDE, EESS, profesión, servicio e indicador. Archivo HTML autónomo con datos incluidos.</p>
+    </div>
+    <div class="badge">RIS ATE · Responsive · Sin instalación</div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="notice">Este archivo puede abrirse directamente en computadora, laptop, tablet o celular. No requiere Excel, Power BI, internet ni instalación.</div>
+
+  <section class="filters">
+    <div class="filterBox"><label>ATIENDE</label><select id="fAtiende"><option value="">Todos</option></select></div>
+    <div class="filterBox"><label>EESS</label><select id="fEess"><option value="">Todos</option></select></div>
+    <div class="filterBox"><label>Profesión</label><select id="fProf"><option value="">Todas</option></select></div>
+    <div class="filterBox"><label>Servicio</label><select id="fServ"><option value="">Todos</option></select></div>
+    <div class="filterBox"><label>Búsqueda</label><input id="fSearch" placeholder="Buscar error, DNI, indicador..."></div>
+  </section>
+
+  <div class="actions">
+    <button class="secondary" onclick="resetFilters()">Limpiar filtros</button>
+    <button onclick="downloadCSV()">Exportar CSV</button>
+  </div>
+
+  <section class="cards">
+    <div class="card"><div class="cardTitle">Errores filtrados</div><div class="cardValue" id="kErrores">0</div><div class="cardNote">Registros observados</div></div>
+    <div class="card"><div class="cardTitle">Personal ATIENDE</div><div class="cardValue" id="kAtiende">0</div><div class="cardNote">Con errores</div></div>
+    <div class="card"><div class="cardTitle">EESS</div><div class="cardValue" id="kEess">0</div><div class="cardNote">Establecimientos</div></div>
+    <div class="card"><div class="cardTitle">Tipos de error</div><div class="cardValue" id="kTipos">0</div><div class="cardNote">Errores únicos</div></div>
+    <div class="card"><div class="cardTitle">Servicios</div><div class="cardValue" id="kServicios">0</div><div class="cardNote">Áreas involucradas</div></div>
+  </section>
+
+  <section class="grid">
+    <div class="panel"><h2>Ranking de errores por ATIENDE</h2><div class="chart" id="chartAtiende"></div></div>
+    <div class="panel"><h2>Distribución por tipo de error</h2><div class="donutWrap"><div id="donut" class="donut"></div><div id="legend" class="legend"></div></div></div>
+  </section>
+
+  <section class="grid">
+    <div class="panel"><h2>Errores por EESS</h2><div class="chart" id="chartEess"></div></div>
+    <div class="panel"><h2>Errores por servicio</h2><div class="chart" id="chartServ"></div></div>
+  </section>
+
+  <section class="panel">
+    <h2>Detalle de registros observados</h2>
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ATIENDE</th><th>DNI</th><th>EESS</th><th>Profesión</th><th>Servicio</th><th>Indicador</th><th>Error</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="footer" id="footer"></div>
+  </section>
+</main>
+
+<script>
+var DATA = [{"ATIENDE": "ELARD ROGER VALDIVIESO CRISTOBAL", "NUM_DOC_ATIENDE": "10615423", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-04-22", "FECHA_REGISTRO": "2026-04-23"}, {"ATIENDE": "IVAN CESAR HUAMAN AQUINO", "NUM_DOC_ATIENDE": "21568767", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-17", "FECHA_REGISTRO": "2026-04-17"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-14", "FECHA_REGISTRO": "2026-04-17"}, {"ATIENDE": "SEDELMAYER MUÑOZ COPE", "NUM_DOC_ATIENDE": "25550772", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-01-03", "FECHA_REGISTRO": "2026-02-01"}, {"ATIENDE": "CARLOS EDUARDO CHARAJA CHAMBI", "NUM_DOC_ATIENDE": "43037276", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-25", "FECHA_REGISTRO": "2026-04-16"}, {"ATIENDE": "ROSA LILIANA SULLON CASTILLO", "NUM_DOC_ATIENDE": "25732829", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-03-31", "FECHA_REGISTRO": "2026-04-06"}, {"ATIENDE": "ROSA LILIANA SULLON CASTILLO", "NUM_DOC_ATIENDE": "25732829", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-07", "FECHA_REGISTRO": "2026-05-03"}, {"ATIENDE": "ROSA LILIANA SULLON CASTILLO", "NUM_DOC_ATIENDE": "25732829", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-07", "FECHA_REGISTRO": "2026-05-03"}, {"ATIENDE": "ROSA LILIANA SULLON CASTILLO", "NUM_DOC_ATIENDE": "25732829", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-06", "FECHA_REGISTRO": "2026-05-03"}, {"ATIENDE": "ROSA LILIANA SULLON CASTILLO", "NUM_DOC_ATIENDE": "25732829", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-06", "FECHA_REGISTRO": "2026-05-03"}, {"ATIENDE": "ALEJANDRA MELISSA PARRA CCORIMANYA", "NUM_DOC_ATIENDE": "72484856", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-01-30", "FECHA_REGISTRO": "2026-02-05"}, {"ATIENDE": "YRMA DORIS MEDRANO LANAZCA", "NUM_DOC_ATIENDE": "9735170", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-02", "FECHA_REGISTRO": "2026-03-02"}, {"ATIENDE": "ZYZY YASMINIA SILVA LABAN", "NUM_DOC_ATIENDE": "3236132", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "301201", "UPS": "CONSEJERIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-20", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "ZYZY YASMINIA SILVA LABAN", "NUM_DOC_ATIENDE": "3236132", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "301201", "UPS": "CONSEJERIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-20", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "ZYZY YASMINIA SILVA LABAN", "NUM_DOC_ATIENDE": "3236132", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "301201", "UPS": "CONSEJERIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-20", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "ZYZY YASMINIA SILVA LABAN", "NUM_DOC_ATIENDE": "3236132", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "301201", "UPS": "CONSEJERIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-20", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "RICARDO EDILBERTO MARIÑAS CORONADO", "NUM_DOC_ATIENDE": "8888565", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-02", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-01", "FECHA_REGISTRO": "2026-05-04"}, {"ATIENDE": "MERLE QUISPE RAMOS", "NUM_DOC_ATIENDE": "40512385", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-17", "FECHA_REGISTRO": "2026-04-20"}, {"ATIENDE": "MICHELLE ALEXANDRA MARIÑAS LUNA", "NUM_DOC_ATIENDE": "71962134", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-19", "FECHA_REGISTRO": "2026-02-19"}, {"ATIENDE": "MICHELLE ALEXANDRA MARIÑAS LUNA", "NUM_DOC_ATIENDE": "71962134", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-16", "FECHA_REGISTRO": "2026-02-16"}, {"ATIENDE": "MANUEL FELIX CARRILLO MUÑANTE", "NUM_DOC_ATIENDE": "21442014", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-27", "FECHA_REGISTRO": "2026-02-03"}, {"ATIENDE": "MANUEL FELIX CARRILLO MUÑANTE", "NUM_DOC_ATIENDE": "21442014", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-27", "FECHA_REGISTRO": "2026-02-03"}, {"ATIENDE": "YERSIN HUANCA MAMANI", "NUM_DOC_ATIENDE": "43842296", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-12", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "VERONICA NADIA CONCEPCION YANAC", "NUM_DOC_ATIENDE": "44747631", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-25", "FECHA_REGISTRO": "2026-02-26"}, {"ATIENDE": "IVAN CESAR HUAMAN ALVARADO", "NUM_DOC_ATIENDE": "45099648", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-16", "FECHA_REGISTRO": "2026-03-17"}, {"ATIENDE": "SUE ANGIELUZ ALVINO RODRIGUEZ", "NUM_DOC_ATIENDE": "72884968", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-20", "FECHA_REGISTRO": "2026-01-27"}, {"ATIENDE": "SUE ANGIELUZ ALVINO RODRIGUEZ", "NUM_DOC_ATIENDE": "72884968", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-09", "FECHA_REGISTRO": "2026-02-11"}, {"ATIENDE": "LUIS MARTIN EXEBIO CESPEDES", "NUM_DOC_ATIENDE": "76578644", "ESTABLECIMIENTO": "SALAMANCA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-04", "FECHA_REGISTRO": "2026-02-06"}, {"ATIENDE": "ROSARIO LILIANA ALARCON MENDEZ", "NUM_DOC_ATIENDE": "10000425", "ESTABLECIMIENTO": "SALAMANCA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-26", "FECHA_REGISTRO": "2026-04-01"}, {"ATIENDE": "ROSARIO LILIANA ALARCON MENDEZ", "NUM_DOC_ATIENDE": "10000425", "ESTABLECIMIENTO": "SALAMANCA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Recuperado", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-03-26", "FECHA_REGISTRO": "2026-04-01"}, {"ATIENDE": "KAREN FANNY SANCHEZ TORIBIO", "NUM_DOC_ATIENDE": "40178586", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-01-23", "FECHA_REGISTRO": "2026-03-20"}, {"ATIENDE": "HECTOR ALEXANDER LLUEN LLUEN", "NUM_DOC_ATIENDE": "45054933", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-01-06", "FECHA_REGISTRO": "2026-02-06"}, {"ATIENDE": "JESUS ELIAS HUAPAYA VILLEGAS", "NUM_DOC_ATIENDE": "9593447", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-16", "FECHA_REGISTRO": "2026-03-04"}, {"ATIENDE": "JESUS ELIAS HUAPAYA VILLEGAS", "NUM_DOC_ATIENDE": "9593447", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-20", "FECHA_REGISTRO": "2026-04-20"}, {"ATIENDE": "ROSA MARIA OROSCO ATENCIO", "NUM_DOC_ATIENDE": "42593798", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-03", "FECHA_REGISTRO": "2026-01-03"}, {"ATIENDE": "ROSA MARIA OROSCO ATENCIO", "NUM_DOC_ATIENDE": "42593798", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-05", "FECHA_REGISTRO": "2026-01-05"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-05", "FECHA_REGISTRO": "2026-01-06"}, {"ATIENDE": "JOSELIN BRIGGETTE PALOMINO TABOADA", "NUM_DOC_ATIENDE": "72039377", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-01-06", "FECHA_REGISTRO": "2026-01-08"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-12", "FECHA_REGISTRO": "2026-01-12"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-12", "FECHA_REGISTRO": "2026-01-12"}, {"ATIENDE": "ROSA MARIA OROSCO ATENCIO", "NUM_DOC_ATIENDE": "42593798", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-13", "FECHA_REGISTRO": "2026-01-13"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-12", "FECHA_REGISTRO": "2026-01-15"}, {"ATIENDE": "ROSA MARIA OROSCO ATENCIO", "NUM_DOC_ATIENDE": "42593798", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-15", "FECHA_REGISTRO": "2026-01-15"}, {"ATIENDE": "ROSA MARIA OROSCO ATENCIO", "NUM_DOC_ATIENDE": "42593798", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-15", "FECHA_REGISTRO": "2026-01-15"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-19", "FECHA_REGISTRO": "2026-01-20"}, {"ATIENDE": "ROSA MARIA OROSCO ATENCIO", "NUM_DOC_ATIENDE": "42593798", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-21", "FECHA_REGISTRO": "2026-01-21"}, {"ATIENDE": "ROSA MARIA OROSCO ATENCIO", "NUM_DOC_ATIENDE": "42593798", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-21", "FECHA_REGISTRO": "2026-01-21"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-21", "FECHA_REGISTRO": "2026-01-21"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-21", "FECHA_REGISTRO": "2026-01-21"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-17", "FECHA_REGISTRO": "2026-01-22"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-21", "FECHA_REGISTRO": "2026-01-23"}, {"ATIENDE": "JORDAN KEREK SALAZAR QUINCHO", "NUM_DOC_ATIENDE": "48167960", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-02", "FECHA_REGISTRO": "2026-01-31"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-27", "FECHA_REGISTRO": "2026-01-27"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-30", "FECHA_REGISTRO": "2026-01-30"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-29", "FECHA_REGISTRO": "2026-01-30"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-28", "FECHA_REGISTRO": "2026-01-30"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-28", "FECHA_REGISTRO": "2026-03-02"}, {"ATIENDE": "ROSA MARIA OROSCO ATENCIO", "NUM_DOC_ATIENDE": "42593798", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-28", "FECHA_REGISTRO": "2026-02-28"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-25", "FECHA_REGISTRO": "2026-02-25"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-19", "FECHA_REGISTRO": "2026-02-24"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-16", "FECHA_REGISTRO": "2026-02-24"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-14", "FECHA_REGISTRO": "2026-02-24"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-13", "FECHA_REGISTRO": "2026-02-24"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-10", "FECHA_REGISTRO": "2026-02-24"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-05", "FECHA_REGISTRO": "2026-02-20"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-14", "FECHA_REGISTRO": "2026-02-14"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-10", "FECHA_REGISTRO": "2026-02-12"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-02-04", "FECHA_REGISTRO": "2026-02-10"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-03", "FECHA_REGISTRO": "2026-02-10"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-09", "FECHA_REGISTRO": "2026-02-09"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-03", "FECHA_REGISTRO": "2026-02-03"}, {"ATIENDE": "ZELMIRA ESCOBAR INGA", "NUM_DOC_ATIENDE": "21443577", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-02", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-27", "FECHA_REGISTRO": "2026-04-06"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-25", "FECHA_REGISTRO": "2026-03-28"}, {"ATIENDE": "ANI MERY CAMACUARI BRAVO", "NUM_DOC_ATIENDE": "47604942", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-26", "FECHA_REGISTRO": "2026-03-26"}, {"ATIENDE": "ANI MERY CAMACUARI BRAVO", "NUM_DOC_ATIENDE": "47604942", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-03-26", "FECHA_REGISTRO": "2026-03-26"}, {"ATIENDE": "ANI MERY CAMACUARI BRAVO", "NUM_DOC_ATIENDE": "47604942", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-03-26", "FECHA_REGISTRO": "2026-03-26"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-03-24", "FECHA_REGISTRO": "2026-03-25"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-23", "FECHA_REGISTRO": "2026-03-25"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-23", "FECHA_REGISTRO": "2026-03-24"}, {"ATIENDE": "ELARD ROGER VALDIVIESO CRISTOBAL", "NUM_DOC_ATIENDE": "10615423", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-23", "FECHA_REGISTRO": "2026-03-24"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-03-13", "FECHA_REGISTRO": "2026-03-18"}, {"ATIENDE": "ELARD ROGER VALDIVIESO CRISTOBAL", "NUM_DOC_ATIENDE": "10615423", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-16", "FECHA_REGISTRO": "2026-03-17"}, {"ATIENDE": "ELARD ROGER VALDIVIESO CRISTOBAL", "NUM_DOC_ATIENDE": "10615423", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-16", "FECHA_REGISTRO": "2026-03-17"}, {"ATIENDE": "ELARD ROGER VALDIVIESO CRISTOBAL", "NUM_DOC_ATIENDE": "10615423", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-16", "FECHA_REGISTRO": "2026-03-17"}, {"ATIENDE": "ELARD ROGER VALDIVIESO CRISTOBAL", "NUM_DOC_ATIENDE": "10615423", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-16", "FECHA_REGISTRO": "2026-03-17"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-11", "FECHA_REGISTRO": "2026-03-17"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-11", "FECHA_REGISTRO": "2026-03-17"}, {"ATIENDE": "ANI MERY CAMACUARI BRAVO", "NUM_DOC_ATIENDE": "47604942", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-17", "FECHA_REGISTRO": "2026-03-17"}, {"ATIENDE": "ROCIO DEL PILAR USCATA BARRENECHEA", "NUM_DOC_ATIENDE": "45197850", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-03-13", "FECHA_REGISTRO": "2026-03-16"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-14", "FECHA_REGISTRO": "2026-03-16"}, {"ATIENDE": "ANI MERY CAMACUARI BRAVO", "NUM_DOC_ATIENDE": "47604942", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-16", "FECHA_REGISTRO": "2026-03-16"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-02", "FECHA_REGISTRO": "2026-03-13"}, {"ATIENDE": "ANI MERY CAMACUARI BRAVO", "NUM_DOC_ATIENDE": "47604942", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-13", "FECHA_REGISTRO": "2026-03-13"}, {"ATIENDE": "ANI MERY CAMACUARI BRAVO", "NUM_DOC_ATIENDE": "47604942", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-13", "FECHA_REGISTRO": "2026-03-13"}, {"ATIENDE": "ROSA MARIA OROSCO ATENCIO", "NUM_DOC_ATIENDE": "42593798", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-02", "FECHA_REGISTRO": "2026-03-02"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-29", "FECHA_REGISTRO": "2026-04-30"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-04-29", "FECHA_REGISTRO": "2026-04-30"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-28", "FECHA_REGISTRO": "2026-04-29"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-28", "FECHA_REGISTRO": "2026-04-29"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-27", "FECHA_REGISTRO": "2026-04-29"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-04-27", "FECHA_REGISTRO": "2026-04-29"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-27", "FECHA_REGISTRO": "2026-04-29"}, {"ATIENDE": "JOSELIN BRIGGETTE PALOMINO TABOADA", "NUM_DOC_ATIENDE": "72039377", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-04-29", "FECHA_REGISTRO": "2026-04-29"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-24", "FECHA_REGISTRO": "2026-04-27"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-20", "FECHA_REGISTRO": "2026-04-24"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-04-22", "FECHA_REGISTRO": "2026-04-24"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-20", "FECHA_REGISTRO": "2026-04-21"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-04-17", "FECHA_REGISTRO": "2026-04-21"}, {"ATIENDE": "ROCIO DEL PILAR USCATA BARRENECHEA", "NUM_DOC_ATIENDE": "45197850", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-18", "FECHA_REGISTRO": "2026-04-20"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-04-17"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-04-17"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-14", "FECHA_REGISTRO": "2026-04-17"}, {"ATIENDE": "ANI MERY CAMACUARI BRAVO", "NUM_DOC_ATIENDE": "47604942", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-16", "FECHA_REGISTRO": "2026-04-16"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-13", "FECHA_REGISTRO": "2026-04-15"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-10", "FECHA_REGISTRO": "2026-04-15"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-13", "FECHA_REGISTRO": "2026-04-15"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-11", "FECHA_REGISTRO": "2026-04-15"}, {"ATIENDE": "ANI MERY CAMACUARI BRAVO", "NUM_DOC_ATIENDE": "47604942", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-14", "FECHA_REGISTRO": "2026-04-14"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-09", "FECHA_REGISTRO": "2026-04-13"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-08", "FECHA_REGISTRO": "2026-04-10"}, {"ATIENDE": "ANA RAMIREZ ESTRATTI", "NUM_DOC_ATIENDE": "40011863", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-06", "FECHA_REGISTRO": "2026-04-10"}, {"ATIENDE": "PATRICIA ELIZABETH CASÓS SERRANO", "NUM_DOC_ATIENDE": "16690205", "ESTABLECIMIENTO": "ALFA Y OMEGA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-04-06", "FECHA_REGISTRO": "2026-04-07"}, {"ATIENDE": "CARLOS EDUARDO CHARAJA CHAMBI", "NUM_DOC_ATIENDE": "43037276", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-03", "FECHA_REGISTRO": "2026-01-06"}, {"ATIENDE": "LINNSUE DAYANA ALARCON CARRASCO", "NUM_DOC_ATIENDE": "72129594", "ESTABLECIMIENTO": "ATE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Cod Antiguo", "FECHA_ATENCION": "2026-01-19", "FECHA_REGISTRO": "2026-01-20"}, {"ATIENDE": "LILIANA CHANCA ANTONIO", "NUM_DOC_ATIENDE": "21551318", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-01-23", "FECHA_REGISTRO": "2026-02-16"}, {"ATIENDE": "ROSA LILIANA SULLON CASTILLO", "NUM_DOC_ATIENDE": "25732829", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-02-23", "FECHA_REGISTRO": "2026-04-22"}, {"ATIENDE": "LINNSUE DAYANA ALARCON CARRASCO", "NUM_DOC_ATIENDE": "72129594", "ESTABLECIMIENTO": "ATE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-23", "FECHA_REGISTRO": "2026-02-24"}, {"ATIENDE": "ROSA LILIANA SULLON CASTILLO", "NUM_DOC_ATIENDE": "25732829", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-03-21", "FECHA_REGISTRO": "2026-03-31"}, {"ATIENDE": "LINNSUE DAYANA ALARCON CARRASCO", "NUM_DOC_ATIENDE": "72129594", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Cod Antiguo", "FECHA_ATENCION": "2026-03-06", "FECHA_REGISTRO": "2026-03-09"}, {"ATIENDE": "ROSA LILIANA SULLON CASTILLO", "NUM_DOC_ATIENDE": "25732829", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-04-23", "FECHA_REGISTRO": "2026-05-03"}, {"ATIENDE": "LILIANA CHANCA ANTONIO", "NUM_DOC_ATIENDE": "21551318", "ESTABLECIMIENTO": "ATE", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-04-24"}, {"ATIENDE": "LINNSUE DAYANA ALARCON CARRASCO", "NUM_DOC_ATIENDE": "72129594", "ESTABLECIMIENTO": "ATE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-09", "FECHA_REGISTRO": "2026-04-21"}, {"ATIENDE": "LINNSUE DAYANA ALARCON CARRASCO", "NUM_DOC_ATIENDE": "72129594", "ESTABLECIMIENTO": "ATE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-04-20"}, {"ATIENDE": "CARMEN ADELA MENDOZA SALDAÑA", "NUM_DOC_ATIENDE": "7609764", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-03", "FECHA_REGISTRO": "2026-01-09"}, {"ATIENDE": "ROCIO DEL PILAR CACERES PALACIOS", "NUM_DOC_ATIENDE": "71792328", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-30", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "ROCIO DEL PILAR CACERES PALACIOS", "NUM_DOC_ATIENDE": "71792328", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-22", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "ROCIO DEL PILAR CACERES PALACIOS", "NUM_DOC_ATIENDE": "71792328", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-19", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "ROCIO DEL PILAR CACERES PALACIOS", "NUM_DOC_ATIENDE": "71792328", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-15", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "ROCIO DEL PILAR CACERES PALACIOS", "NUM_DOC_ATIENDE": "71792328", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-02", "FECHA_REGISTRO": "2026-01-28"}, {"ATIENDE": "ROCIO DEL PILAR CACERES PALACIOS", "NUM_DOC_ATIENDE": "71792328", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-21", "FECHA_REGISTRO": "2026-03-03"}, {"ATIENDE": "ALEJANDRA MELISSA PARRA CCORIMANYA", "NUM_DOC_ATIENDE": "72484856", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-24", "FECHA_REGISTRO": "2026-02-24"}, {"ATIENDE": "ROCIO DEL PILAR CACERES PALACIOS", "NUM_DOC_ATIENDE": "71792328", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-12", "FECHA_REGISTRO": "2026-03-31"}, {"ATIENDE": "ROCIO DEL PILAR CACERES PALACIOS", "NUM_DOC_ATIENDE": "71792328", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-03-10", "FECHA_REGISTRO": "2026-03-31"}, {"ATIENDE": "ROCIO DEL PILAR CACERES PALACIOS", "NUM_DOC_ATIENDE": "71792328", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-02", "FECHA_REGISTRO": "2026-03-18"}, {"ATIENDE": "ALEJANDRA MELISSA PARRA CCORIMANYA", "NUM_DOC_ATIENDE": "72484856", "ESTABLECIMIENTO": "EL BOSQUE", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-28", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-05", "FECHA_REGISTRO": "2026-01-05"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-06", "FECHA_REGISTRO": "2026-01-06"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-16", "FECHA_REGISTRO": "2026-04-17"}, {"ATIENDE": "PATRICIA VASQUEZ CURO", "NUM_DOC_ATIENDE": "45473716", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-12", "FECHA_REGISTRO": "2026-01-12"}, {"ATIENDE": "GRETTY YACORY SANDOVAL TAMAYO", "NUM_DOC_ATIENDE": "43667607", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-13", "FECHA_REGISTRO": "2026-01-13"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-21", "FECHA_REGISTRO": "2026-01-21"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-24", "FECHA_REGISTRO": "2026-01-24"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-29", "FECHA_REGISTRO": "2026-01-29"}, {"ATIENDE": "GRETTY YACORY SANDOVAL TAMAYO", "NUM_DOC_ATIENDE": "43667607", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-26", "FECHA_REGISTRO": "2026-02-26"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-14", "FECHA_REGISTRO": "2026-02-14"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-12", "FECHA_REGISTRO": "2026-02-12"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-06", "FECHA_REGISTRO": "2026-02-06"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-06", "FECHA_REGISTRO": "2026-02-06"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-05", "FECHA_REGISTRO": "2026-02-05"}, {"ATIENDE": "JUAN ERICK CALDERON GONZALES", "NUM_DOC_ATIENDE": "45508133", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-14", "FECHA_REGISTRO": "2026-04-15"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-28", "FECHA_REGISTRO": "2026-03-28"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-26", "FECHA_REGISTRO": "2026-03-26"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-24", "FECHA_REGISTRO": "2026-03-24"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-24", "FECHA_REGISTRO": "2026-03-24"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-23", "FECHA_REGISTRO": "2026-03-23"}, {"ATIENDE": "PATRICIA VASQUEZ CURO", "NUM_DOC_ATIENDE": "45473716", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-19", "FECHA_REGISTRO": "2026-03-19"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-10", "FECHA_REGISTRO": "2026-03-10"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-05", "FECHA_REGISTRO": "2026-03-05"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-05", "FECHA_REGISTRO": "2026-03-05"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-02", "FECHA_REGISTRO": "2026-03-02"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-29", "FECHA_REGISTRO": "2026-04-29"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-29", "FECHA_REGISTRO": "2026-04-29"}, {"ATIENDE": "PATRICIA VASQUEZ CURO", "NUM_DOC_ATIENDE": "45473716", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-24", "FECHA_REGISTRO": "2026-04-24"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-23", "FECHA_REGISTRO": "2026-04-23"}, {"ATIENDE": "PATRICIA VASQUEZ CURO", "NUM_DOC_ATIENDE": "45473716", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-22", "FECHA_REGISTRO": "2026-04-22"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-20", "FECHA_REGISTRO": "2026-04-20"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-17", "FECHA_REGISTRO": "2026-04-17"}, {"ATIENDE": "GRETTY YACORY SANDOVAL TAMAYO", "NUM_DOC_ATIENDE": "43667607", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-14", "FECHA_REGISTRO": "2026-04-14"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-13", "FECHA_REGISTRO": "2026-04-13"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-13", "FECHA_REGISTRO": "2026-04-13"}, {"ATIENDE": "YOLANDA LOPEZ MELGAREJO", "NUM_DOC_ATIENDE": "75240572", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-07", "FECHA_REGISTRO": "2026-04-07"}, {"ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "NUM_DOC_ATIENDE": "21861852", "ESTABLECIMIENTO": "GUSTAVO LANATTA", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-01", "FECHA_REGISTRO": "2026-04-01"}, {"ATIENDE": "ROSARIO PAUCAR CAÑARI", "NUM_DOC_ATIENDE": "10584622", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-13", "FECHA_REGISTRO": "2026-01-15"}, {"ATIENDE": "DERICK RODOLFO LAZO RIVERA", "NUM_DOC_ATIENDE": "72183620", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Cod Antiguo", "FECHA_ATENCION": "2026-01-22", "FECHA_REGISTRO": "2026-01-22"}, {"ATIENDE": "SILVESTRINA CHAHUA MELGAREJO", "NUM_DOC_ATIENDE": "10259877", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "TECNOLOGO MEDICO", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-03", "FECHA_REGISTRO": "2026-01-30"}, {"ATIENDE": "MERLE QUISPE RAMOS", "NUM_DOC_ATIENDE": "40512385", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-02-28", "FECHA_REGISTRO": "2026-03-27"}, {"ATIENDE": "BRIGITTE GLORIA LASHMY ROJAS SALVATIERRA", "NUM_DOC_ATIENDE": "73644766", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-02-19", "FECHA_REGISTRO": "2026-02-23"}, {"ATIENDE": "PERCY ALEJANDRO HERNANI QUISPE", "NUM_DOC_ATIENDE": "72119743", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Cod Antiguo", "FECHA_ATENCION": "2026-02-06", "FECHA_REGISTRO": "2026-02-06"}, {"ATIENDE": "ROSARIO PAUCAR CAÑARI", "NUM_DOC_ATIENDE": "10584622", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-17", "FECHA_REGISTRO": "2026-03-31"}, {"ATIENDE": "MERLE QUISPE RAMOS", "NUM_DOC_ATIENDE": "40512385", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-03-10", "FECHA_REGISTRO": "2026-03-30"}, {"ATIENDE": "MICHELLE ALEXANDRA MARIÑAS LUNA", "NUM_DOC_ATIENDE": "71962134", "ESTABLECIMIENTO": "MICAELA BASTIDAS", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Cod Antiguo", "FECHA_ATENCION": "2026-03-03", "FECHA_REGISTRO": "2026-03-03"}, {"ATIENDE": "MELIZA LEYSI ROJAS ROJAS", "NUM_DOC_ATIENDE": "44540124", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-10", "FECHA_REGISTRO": "2026-01-10"}, {"ATIENDE": "CELIA MARISOL PAMPA CALLATA", "NUM_DOC_ATIENDE": "40153360", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-08", "FECHA_REGISTRO": "2026-01-13"}, {"ATIENDE": "CELIA MARISOL PAMPA CALLATA", "NUM_DOC_ATIENDE": "40153360", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-19", "FECHA_REGISTRO": "2026-02-04"}, {"ATIENDE": "JANNETH PAOLA ESQUEN VICENTE", "NUM_DOC_ATIENDE": "41242249", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "301203", "UPS": "ENFERMERIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-24", "FECHA_REGISTRO": "2026-02-02"}, {"ATIENDE": "CELIA MARISOL PAMPA CALLATA", "NUM_DOC_ATIENDE": "40153360", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-01-26", "FECHA_REGISTRO": "2026-01-26"}, {"ATIENDE": "JANNETH PAOLA ESQUEN VICENTE", "NUM_DOC_ATIENDE": "41242249", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-29", "FECHA_REGISTRO": "2026-01-29"}, {"ATIENDE": "CELIA MARISOL PAMPA CALLATA", "NUM_DOC_ATIENDE": "40153360", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-03", "FECHA_REGISTRO": "2026-03-04"}, {"ATIENDE": "CELIA MARISOL PAMPA CALLATA", "NUM_DOC_ATIENDE": "40153360", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-02-26", "FECHA_REGISTRO": "2026-03-02"}, {"ATIENDE": "CELIA MARISOL PAMPA CALLATA", "NUM_DOC_ATIENDE": "40153360", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-02-06", "FECHA_REGISTRO": "2026-03-02"}, {"ATIENDE": "YENY SHOVA VICTORIO VELASQUEZ", "NUM_DOC_ATIENDE": "4041905", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "301203", "UPS": "ENFERMERIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-19", "FECHA_REGISTRO": "2026-02-19"}, {"ATIENDE": "ARMANDO MARIN CARHUAMACA", "NUM_DOC_ATIENDE": "20058945", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "110000", "UPS": "FARMACIA", "PROFESION": "QUIMICO FARMACEUTICO", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Cod Antiguo", "FECHA_ATENCION": "2026-02-06", "FECHA_REGISTRO": "2026-02-16"}, {"ATIENDE": "CELIA MARISOL PAMPA CALLATA", "NUM_DOC_ATIENDE": "40153360", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-05", "FECHA_REGISTRO": "2026-02-10"}, {"ATIENDE": "YENY SHOVA VICTORIO VELASQUEZ", "NUM_DOC_ATIENDE": "4041905", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-07", "FECHA_REGISTRO": "2026-02-07"}, {"ATIENDE": "JANNETH PAOLA ESQUEN VICENTE", "NUM_DOC_ATIENDE": "41242249", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-06", "FECHA_REGISTRO": "2026-02-06"}, {"ATIENDE": "YENY SHOVA VICTORIO VELASQUEZ", "NUM_DOC_ATIENDE": "4041905", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-05", "FECHA_REGISTRO": "2026-02-05"}, {"ATIENDE": "CHRIS NOELIA CASTILLO PINEDA", "NUM_DOC_ATIENDE": "40910546", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303712", "UPS": "PEDIATRIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-20", "FECHA_REGISTRO": "2026-04-06"}, {"ATIENDE": "CELIA MARISOL PAMPA CALLATA", "NUM_DOC_ATIENDE": "40153360", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-18", "FECHA_REGISTRO": "2026-03-31"}, {"ATIENDE": "JANNETH PAOLA ESQUEN VICENTE", "NUM_DOC_ATIENDE": "41242249", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-12", "FECHA_REGISTRO": "2026-03-12"}, {"ATIENDE": "CELIA MARISOL PAMPA CALLATA", "NUM_DOC_ATIENDE": "40153360", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-06", "FECHA_REGISTRO": "2026-03-11"}, {"ATIENDE": "JANNETH PAOLA ESQUEN VICENTE", "NUM_DOC_ATIENDE": "41242249", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-04", "FECHA_REGISTRO": "2026-03-04"}, {"ATIENDE": "ERIKA ANTOANETT AMARO GRADOS", "NUM_DOC_ATIENDE": "10244801", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "301203", "UPS": "ENFERMERIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-25", "FECHA_REGISTRO": "2026-04-30"}, {"ATIENDE": "ERIKA ANTOANETT AMARO GRADOS", "NUM_DOC_ATIENDE": "10244801", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "301203", "UPS": "ENFERMERIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-14", "FECHA_REGISTRO": "2026-04-25"}, {"ATIENDE": "CELIA MARISOL PAMPA CALLATA", "NUM_DOC_ATIENDE": "40153360", "ESTABLECIMIENTO": "SAN FERNANDO", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-08", "FECHA_REGISTRO": "2026-04-18"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-05", "FECHA_REGISTRO": "2026-01-05"}, {"ATIENDE": "JUANY MADELAINE YUNCACCALLO HUAMANI", "NUM_DOC_ATIENDE": "28273252", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-01-17", "FECHA_REGISTRO": "2026-01-17"}, {"ATIENDE": "ANA LUZ ALMENDRE USEDO", "NUM_DOC_ATIENDE": "45825004", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-25", "FECHA_REGISTRO": "2026-03-05"}, {"ATIENDE": "ANA LUZ ALMENDRE USEDO", "NUM_DOC_ATIENDE": "45825004", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-14", "FECHA_REGISTRO": "2026-02-25"}, {"ATIENDE": "ANA LUZ ALMENDRE USEDO", "NUM_DOC_ATIENDE": "45825004", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-11", "FECHA_REGISTRO": "2026-02-19"}, {"ATIENDE": "ANA LUZ ALMENDRE USEDO", "NUM_DOC_ATIENDE": "45825004", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-18", "FECHA_REGISTRO": "2026-03-31"}, {"ATIENDE": "ANA LUZ ALMENDRE USEDO", "NUM_DOC_ATIENDE": "45825004", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-17", "FECHA_REGISTRO": "2026-03-26"}, {"ATIENDE": "ANA LUZ ALMENDRE USEDO", "NUM_DOC_ATIENDE": "45825004", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-12", "FECHA_REGISTRO": "2026-03-23"}, {"ATIENDE": "ANA LUZ ALMENDRE USEDO", "NUM_DOC_ATIENDE": "45825004", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-03-04", "FECHA_REGISTRO": "2026-03-13"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "KATHY CORIN ROMERO LARA", "NUM_DOC_ATIENDE": "76372251", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-05-02"}, {"ATIENDE": "TEODOSIA PEREZ VELITA", "NUM_DOC_ATIENDE": "46219275", "ESTABLECIMIENTO": "TUPAC AMARU", "SERVICIO": "303713", "UPS": "ATENCION INTEGRAL DEL NINO", "PROFESION": "ENFERMERA (O)", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-04-14", "FECHA_REGISTRO": "2026-04-14"}, {"ATIENDE": "ROSARIO LILIANA ALARCON MENDEZ", "NUM_DOC_ATIENDE": "10000425", "ESTABLECIMIENTO": "SALAMANCA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-10", "FECHA_REGISTRO": "2026-01-30"}, {"ATIENDE": "KAREM MELISSA ALDAZÁBAL BARBARÁN", "NUM_DOC_ATIENDE": "48041154", "ESTABLECIMIENTO": "SALAMANCA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-02-12", "FECHA_REGISTRO": "2026-02-12"}, {"ATIENDE": "ROSARIO LILIANA ALARCON MENDEZ", "NUM_DOC_ATIENDE": "10000425", "ESTABLECIMIENTO": "SALAMANCA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-16", "FECHA_REGISTRO": "2026-04-01"}, {"ATIENDE": "ROSARIO LILIANA ALARCON MENDEZ", "NUM_DOC_ATIENDE": "10000425", "ESTABLECIMIENTO": "SALAMANCA", "SERVICIO": "302101", "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-16", "FECHA_REGISTRO": "2026-04-01"}, {"ATIENDE": "ROXANA ELISA GARATE GARATE", "NUM_DOC_ATIENDE": "9874073", "ESTABLECIMIENTO": "SALAMANCA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-16", "FECHA_REGISTRO": "2026-04-16"}, {"ATIENDE": "YARITZA ANGELA FERNANDEZ GARCIA", "NUM_DOC_ATIENDE": "42668893", "ESTABLECIMIENTO": "SALAMANCA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error Valor", "FECHA_ATENCION": "2026-04-09", "FECHA_REGISTRO": "2026-04-09"}, {"ATIENDE": "KAROLAYN JEANETTE ESPINOZA VALERA", "NUM_DOC_ATIENDE": "47225147", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-01-31", "FECHA_REGISTRO": "2026-03-27"}, {"ATIENDE": "ESTHER GLADYS BALBIN RAMOS", "NUM_DOC_ATIENDE": "41566624", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-01-12", "FECHA_REGISTRO": "2026-02-05"}, {"ATIENDE": "HECTOR ALEXANDER LLUEN LLUEN", "NUM_DOC_ATIENDE": "45054933", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Tipo_diag", "FECHA_ATENCION": "2026-02-28", "FECHA_REGISTRO": "2026-04-17"}, {"ATIENDE": "ELIZABETH SARA ESPINOZA HUERTA", "NUM_DOC_ATIENDE": "40349044", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-02-16", "FECHA_REGISTRO": "2026-04-13"}, {"ATIENDE": "ELIZABETH SARA ESPINOZA HUERTA", "NUM_DOC_ATIENDE": "40349044", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-02-27", "FECHA_REGISTRO": "2026-03-04"}, {"ATIENDE": "ELIZABETH SARA ESPINOZA HUERTA", "NUM_DOC_ATIENDE": "40349044", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-30", "FECHA_REGISTRO": "2026-04-20"}, {"ATIENDE": "ENZO JUNIOR BERROCAL CHAVEZ", "NUM_DOC_ATIENDE": "48648497", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error Lab", "FECHA_ATENCION": "2026-03-27", "FECHA_REGISTRO": "2026-04-01"}, {"ATIENDE": "HECTOR ALEXANDER LLUEN LLUEN", "NUM_DOC_ATIENDE": "45054933", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "302303", "UPS": "MEDICINA GENERAL", "PROFESION": "MEDICO GENERAL", "INDICADOR": "Entrega de suplemento", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-04-10", "FECHA_REGISTRO": "2026-04-18"}, {"ATIENDE": "HILDA ELSA GAMARRA SUAREZ", "NUM_DOC_ATIENDE": "10504473", "ESTABLECIMIENTO": "FORTALEZA", "SERVICIO": "303101", "UPS": "NUTRICION", "PROFESION": "NUTRICIONISTA", "INDICADOR": "Tamizaje de Anemia", "ERROR": "Error_Tipo Doc", "FECHA_ATENCION": "2026-04-15", "FECHA_REGISTRO": "2026-04-15"}];
+var COLORS = ['#38bdf8','#22c55e','#f59e0b','#ef4444','#a855f7','#14b8a6','#eab308','#fb7185','#60a5fa','#f97316'];
+
+function text(v){ return v === null || v === undefined ? '' : String(v); }
+function fmt(n){ return new Intl.NumberFormat('es-PE').format(n || 0); }
+function escapeHtml(s){ return text(s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
+
+function unique(key){
+  var set = {};
+  DATA.forEach(function(r){ var v=text(r[key]); if(v) set[v]=true; });
+  return Object.keys(set).sort();
+}
+
+function fillSelect(id,key){
+  var sel=document.getElementById(id);
+  unique(key).forEach(function(v){
+    var opt=document.createElement('option');
+    opt.value=v; opt.textContent=v;
+    sel.appendChild(opt);
+  });
+}
+
+fillSelect('fAtiende','ATIENDE');
+fillSelect('fEess','ESTABLECIMIENTO');
+fillSelect('fProf','PROFESION');
+fillSelect('fServ','SERVICIO');
+
+['fAtiende','fEess','fProf','fServ','fSearch'].forEach(function(id){
+  document.getElementById(id).addEventListener('input',render);
+});
+
+function getFiltered(){
+  var a=document.getElementById('fAtiende').value;
+  var e=document.getElementById('fEess').value;
+  var p=document.getElementById('fProf').value;
+  var s=document.getElementById('fServ').value;
+  var q=document.getElementById('fSearch').value.toLowerCase().trim();
+
+  return DATA.filter(function(r){
+    var ok = (!a || r.ATIENDE===a) &&
+             (!e || r.ESTABLECIMIENTO===e) &&
+             (!p || r.PROFESION===p) &&
+             (!s || r.SERVICIO===s);
+    if(!ok) return false;
+    if(!q) return true;
+    return Object.keys(r).map(function(k){return text(r[k]);}).join(' ').toLowerCase().indexOf(q)>=0;
+  });
+}
+
+function group(arr,key){
+  var m={};
+  arr.forEach(function(r){
+    var k=text(r[key]) || 'Sin dato';
+    m[k]=(m[k]||0)+1;
+  });
+  return Object.keys(m).map(function(k){return {name:k,total:m[k]};}).sort(function(a,b){return b.total-a.total;});
+}
+
+function barChart(id,data,limit,cls){
+  var el=document.getElementById(id);
+  var max=1;
+  data.forEach(function(d){ if(d.total>max) max=d.total; });
+  var html='';
+  data.slice(0,limit).forEach(function(d){
+    html += '<div class="barRow" title="'+escapeHtml(d.name)+'">'+
+      '<div class="name">'+escapeHtml(d.name)+'</div>'+
+      '<div class="track"><div class="fill '+(cls||'')+'" style="width:'+((d.total/max)*100)+'%"></div></div>'+
+      '<div class="num">'+fmt(d.total)+'</div>'+
+      '</div>';
+  });
+  el.innerHTML = html || '<p style="color:var(--muted)">Sin datos</p>';
+}
+
+function donut(data){
+  var top=data.slice(0,10);
+  var total=top.reduce(function(a,b){return a+b.total;},0) || 1;
+  var angle=0;
+  var parts=[];
+  var legend='';
+  top.forEach(function(d,i){
+    var start=angle;
+    angle += d.total/total*360;
+    parts.push(COLORS[i%COLORS.length]+' '+start+'deg '+angle+'deg');
+    var label=d.name.length>44 ? d.name.substring(0,44)+'...' : d.name;
+    legend += '<div class="legendItem"><span class="dot" style="background:'+COLORS[i%COLORS.length]+'"></span><span title="'+escapeHtml(d.name)+'">'+escapeHtml(label)+'</span><b>'+fmt(d.total)+'</b></div>';
+  });
+  document.getElementById('donut').style.background = parts.length ? 'conic-gradient('+parts.join(',')+')' : '#12385c';
+  document.getElementById('legend').innerHTML = legend || '<p style="color:var(--muted)">Sin datos</p>';
+}
+
+function table(arr){
+  var rows='';
+  arr.slice(0,700).forEach(function(r){
+    rows += '<tr>'+
+      '<td data-label="ATIENDE">'+escapeHtml(r.ATIENDE)+'</td>'+
+      '<td data-label="DNI">'+escapeHtml(r.NUM_DOC_ATIENDE)+'</td>'+
+      '<td data-label="EESS">'+escapeHtml(r.ESTABLECIMIENTO)+'</td>'+
+      '<td data-label="Profesión">'+escapeHtml(r.PROFESION)+'</td>'+
+      '<td data-label="Servicio">'+escapeHtml(r.SERVICIO)+'</td>'+
+      '<td data-label="Indicador">'+escapeHtml(r.INDICADOR)+'</td>'+
+      '<td data-label="Error">'+escapeHtml(r.ERROR)+'</td>'+
+      '</tr>';
+  });
+  document.getElementById('tbody').innerHTML=rows;
+  document.getElementById('footer').innerText='Mostrando '+fmt(Math.min(arr.length,700))+' de '+fmt(arr.length)+' registros filtrados.';
+}
+
+function render(){
+  var arr=getFiltered();
+  document.getElementById('kErrores').innerText=fmt(arr.length);
+  document.getElementById('kAtiende').innerText=fmt(group(arr,'ATIENDE').length);
+  document.getElementById('kEess').innerText=fmt(group(arr,'ESTABLECIMIENTO').length);
+  document.getElementById('kTipos').innerText=fmt(group(arr,'ERROR').length);
+  document.getElementById('kServicios').innerText=fmt(group(arr,'SERVICIO').length);
+
+  barChart('chartAtiende',group(arr,'ATIENDE'),25,'');
+  barChart('chartEess',group(arr,'ESTABLECIMIENTO'),25,'green');
+  barChart('chartServ',group(arr,'SERVICIO'),20,'yellow');
+  donut(group(arr,'ERROR'));
+  table(arr);
+}
+
+function resetFilters(){
+  ['fAtiende','fEess','fProf','fServ'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('fSearch').value='';
+  render();
+}
+
+function downloadCSV(){
+  var arr=getFiltered();
+  var cols=['ATIENDE','NUM_DOC_ATIENDE','ESTABLECIMIENTO','PROFESION','SERVICIO','INDICADOR','ERROR'];
+  var csv=cols.join(',')+'\n';
+  arr.forEach(function(r){
+    csv += cols.map(function(c){return '"'+text(r[c]).replace(/"/g,'""')+'"';}).join(',')+'\n';
+  });
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='dashboard_errores_filtrado.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+render();
+</script>
+</body>
+</html>
