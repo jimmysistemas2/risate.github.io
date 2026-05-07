@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Ejecutivo de Errores HIS</title>
+<style>
+:root {
+  --bg:#071526; --panel:#0d2038; --panel2:#102943; --text:#eaf2ff; --muted:#9fb3ca;
+  --accent:#38bdf8; --accent2:#22c55e; --warn:#f59e0b; --danger:#ef4444; --border:rgba(255,255,255,.12);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top left,#15375e 0,#071526 42%,#04101d 100%);color:var(--text)}
+.header{padding:28px 34px 18px;display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:1px solid var(--border)}
+.header h1{margin:0;font-size:28px;letter-spacing:.2px}
+.header p{margin:8px 0 0;color:var(--muted);font-size:14px}
+.badge{padding:9px 13px;border:1px solid var(--border);border-radius:999px;background:rgba(56,189,248,.1);color:#b8ecff;font-weight:600;white-space:nowrap}
+.container{padding:24px 34px 40px}
+.filters{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.control{background:rgba(13,32,56,.88);border:1px solid var(--border);border-radius:16px;padding:12px}
+.control label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}
+select,input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#071a2d;color:var(--text);outline:none}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+.card{background:linear-gradient(160deg,rgba(16,41,67,.95),rgba(13,32,56,.82));border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:0 14px 30px rgba(0,0,0,.22)}
+.card .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.8px}
+.card .value{font-size:30px;font-weight:800;margin-top:8px}
+.card .note{font-size:12px;color:var(--muted);margin-top:6px}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px}
+.panel{background:rgba(13,32,56,.88);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:0 14px 30px rgba(0,0,0,.2)}
+.panel h2{font-size:17px;margin:0 0 14px}
+.chart{height:360px;display:flex;flex-direction:column;gap:8px;overflow:auto;padding-right:6px}
+.barrow{display:grid;grid-template-columns:minmax(150px,42%) 1fr 48px;gap:10px;align-items:center;font-size:12px}
+.name{color:#dbeafe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{height:18px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),#2563eb)}
+.num{text-align:right;color:#dbeafe;font-weight:700}
+.donutWrap{display:flex;align-items:center;gap:24px;justify-content:center;min-height:330px}
+.donut{width:210px;height:210px;border-radius:50%;background:conic-gradient(var(--accent) 0deg, var(--accent2) 80deg, var(--warn) 170deg, var(--danger) 250deg, #8b5cf6 330deg);position:relative;box-shadow:inset 0 0 0 1px var(--border)}
+.donut:after{content:"";position:absolute;inset:42px;background:var(--panel);border-radius:50%;border:1px solid var(--border)}
+.legend{display:flex;flex-direction:column;gap:9px;max-height:320px;overflow:auto}
+.legendItem{display:grid;grid-template-columns:12px 1fr auto;gap:9px;align-items:center;font-size:12px;color:#dbeafe}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--accent)}
+.tableWrap{overflow:auto;max-height:430px;border-radius:16px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12px;background:rgba(7,21,38,.4)}
+th{position:sticky;top:0;background:#0f2945;color:#cfe8ff;text-align:left;padding:10px;border-bottom:1px solid var(--border);z-index:1}
+td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.07);color:#eaf2ff;vertical-align:top}
+tr:hover{background:rgba(56,189,248,.08)}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-bottom:14px;flex-wrap:wrap}
+button{border:1px solid var(--border);background:linear-gradient(135deg,#0ea5e9,#2563eb);color:white;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+button.secondary{background:#102943}
+.footer{color:var(--muted);font-size:12px;margin-top:16px;text-align:right}
+@media(max-width:1050px){.filters,.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:650px){.header,.container{padding-left:16px;padding-right:16px}.filters,.cards{grid-template-columns:1fr}.header{flex-direction:column}}
+
+/* ===== OPTIMIZACIÓN RESPONSIVE PARA MÓVIL ===== */
+@media(max-width:768px){
+  body{background:#071526;}
+  .header{
+    padding:18px 16px 14px;
+    gap:12px;
+    position:sticky;
+    top:0;
+    z-index:50;
+    backdrop-filter:blur(12px);
+    background:rgba(7,21,38,.92);
+  }
+  .header h1{font-size:20px;line-height:1.18}
+  .header p{font-size:12px;line-height:1.35}
+  .badge{font-size:11px;padding:7px 10px;align-self:flex-start}
+  .container{padding:16px 12px 28px}
+  .filters{
+    grid-template-columns:1fr;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .control{border-radius:14px;padding:10px}
+  select,input{font-size:14px;min-height:42px}
+  .actions{
+    position:sticky;
+    top:108px;
+    z-index:40;
+    background:rgba(7,21,38,.92);
+    padding:8px 0;
+    justify-content:space-between;
+  }
+  button{flex:1;padding:10px 8px;font-size:12px}
+  .cards{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:10px;
+  }
+  .card{
+    border-radius:16px;
+    padding:13px;
+    min-height:104px;
+  }
+  .card .label{font-size:10px;line-height:1.2}
+  .card .value{font-size:24px;margin-top:6px}
+  .card .note{font-size:10px;line-height:1.2}
+  .grid{
+    display:block;
+    margin-bottom:0;
+  }
+  .panel{
+    border-radius:18px;
+    padding:14px;
+    margin-bottom:14px;
+  }
+  .panel h2{font-size:15px;margin-bottom:12px}
+  .chart{
+    height:300px;
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .barrow{
+    grid-template-columns:minmax(132px,48%) 1fr 38px;
+    gap:7px;
+    font-size:11px;
+    min-height:26px;
+  }
+  .track{height:15px}
+  .donutWrap{
+    flex-direction:column;
+    gap:14px;
+    min-height:auto;
+  }
+  .donut{width:170px;height:170px}
+  .donut:after{inset:34px}
+  .legend{
+    width:100%;
+    max-height:220px;
+  }
+  .legendItem{
+    grid-template-columns:10px 1fr auto;
+    font-size:11px;
+  }
+  .dot{width:10px;height:10px}
+  .tableWrap{
+    border:0;
+    max-height:none;
+    overflow:visible;
+  }
+  table, thead, tbody, th, td, tr{
+    display:block;
+  }
+  thead{display:none}
+  tbody tr{
+    background:rgba(7,21,38,.62);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:10px;
+    margin-bottom:10px;
+  }
+  tbody td{
+    border:0;
+    padding:7px 0;
+    display:grid;
+    grid-template-columns:118px 1fr;
+    gap:8px;
+    font-size:11px;
+    word-break:break-word;
+  }
+  tbody td::before{
+    content:attr(data-label);
+    color:var(--muted);
+    font-weight:700;
+  }
+  .footer{text-align:left;font-size:11px}
+}
+@media(max-width:420px){
+  .cards{grid-template-columns:1fr}
+  .actions{top:118px}
+  tbody td{grid-template-columns:100px 1fr}
+}
+
+</style>
+</head>
+<body>
+<header class="header">
+  <div>
+    <h1>Dashboard Ejecutivo de Errores Identificados</h1>
+    <p>Análisis gerencial por personal que atiende, EESS, profesión y tipo de error. Diseño responsive para PC, tablet y móvil.</p>
+  </div>
+  <div class="badge">RIS ATE · Control de Calidad de Registro</div>
+</header>
+
+<main class="container">
+  <section class="filters">
+    <div class="control"><label>Responsable / ATIENDE</label><select id="fAtiende"><option value="">Todos</option></select></div>
+    <div class="control"><label>EESS / Establecimiento</label><select id="fEess"><option value="">Todos</option></select></div>
+    <div class="control"><label>Profesión</label><select id="fProf"><option value="">Todas</option></select></div>
+    <div class="control"><label>Buscar texto</label><input id="fSearch" placeholder="Error, DNI, indicador, servicio..."></div>
+  </section>
+
+  <div class="actions">
+    <button onclick="resetFilters()" class="secondary">Limpiar filtros</button>
+    <button onclick="downloadCSV()">Exportar vista CSV</button>
+  </div>
+
+  <section class="cards">
+    <div class="card"><div class="label">Total registros base</div><div class="value" id="kTotalBase">0</div><div class="note">Registros del Excel original</div></div>
+    <div class="card"><div class="label">Errores filtrados</div><div class="value" id="kErrors">0</div><div class="note">Según filtros activos</div></div>
+    <div class="card"><div class="label">Personal involucrado</div><div class="value" id="kAtiende">0</div><div class="note">ATIENDE con error</div></div>
+    <div class="card"><div class="label">EESS involucrados</div><div class="value" id="kEess">0</div><div class="note">Establecimientos con error</div></div>
+    <div class="card"><div class="label">Tipos de error</div><div class="value" id="kType">0</div><div class="note">Errores únicos</div></div>
+  </section>
+
+  <section class="grid">
+    <div class="panel"><h2>Ranking de errores por ATIENDE</h2><div id="chartAtiende" class="chart"></div></div>
+    <div class="panel"><h2>Distribución por tipo de error</h2><div class="donutWrap"><div class="donut" id="donut"></div><div class="legend" id="legendError"></div></div></div>
+  </section>
+
+  <section class="grid">
+    <div class="panel"><h2>Errores por EESS</h2><div id="chartEess" class="chart"></div></div>
+    <div class="panel"><h2>Errores por profesión</h2><div id="chartProf" class="chart"></div></div>
+  </section>
+
+  <section class="panel">
+    <h2>Detalle de registros observados</h2>
+    <div class="tableWrap">
+      <table id="detailTable">
+        <thead><tr><th>ATIENDE</th><th>NUM_DOC_ATIENDE</th><th>EESS</th><th>Profesión</th><th>Servicio</th><th>Fecha</th><th>Indicador</th><th>Error</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="footer" id="footerCount"></div>
+  </section>
+</main>
+
+<script>
+const DATA = {"records": [{"NUMREG": 7, "SERVICIO": 302101, "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "RENIPRESS": 5933, "ESTABLECIMIENTO": "ALFA Y OMEGA", "Id_Cita": 1382355474, "NRO_DOC": "SD-N00900262", "NUM_DOC_ATIENDE": 10615423, "ATIENDE": "ELARD ROGER VALDIVIESO CRISTOBAL", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-04-22", "FECHA_REGISTRO": "2026-04-23", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error_Tipo Doc"}, {"NUMREG": 1, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5933, "ESTABLECIMIENTO": "ALFA Y OMEGA", "Id_Cita": 1379750890, "NRO_DOC": "94284079", "NUM_DOC_ATIENDE": 21568767, "ATIENDE": "IVAN CESAR HUAMAN AQUINO", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-04-17", "FECHA_REGISTRO": "2026-04-17", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 2, "SERVICIO": 303101, "UPS": "NUTRICION", "RENIPRESS": 5933, "ESTABLECIMIENTO": "ALFA Y OMEGA", "Id_Cita": 1379513537, "NRO_DOC": "94281277", "NUM_DOC_ATIENDE": 40011863, "ATIENDE": "ANA RAMIREZ ESTRATTI", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-04-14", "FECHA_REGISTRO": "2026-04-17", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 5, "SERVICIO": 302101, "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "RENIPRESS": 5930, "ESTABLECIMIENTO": "ATE", "Id_Cita": 1345498993, "NRO_DOC": "C01-00010566439", "NUM_DOC_ATIENDE": 25550772, "ATIENDE": "SEDELMAYER MUÑOZ COPE", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-03", "FECHA_REGISTRO": "2026-02-01", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error_Tipo Doc"}, {"NUMREG": 1, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5930, "ESTABLECIMIENTO": "ATE", "Id_Cita": 1378943397, "NRO_DOC": "94185600", "NUM_DOC_ATIENDE": 43037276, "ATIENDE": "CARLOS EDUARDO CHARAJA CHAMBI", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-03-25", "FECHA_REGISTRO": "2026-04-16", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab"}, {"NUMREG": 6, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5930, "ESTABLECIMIENTO": "ATE", "Id_Cita": 1374184845, "NRO_DOC": "C01-00010472811", "NUM_DOC_ATIENDE": 25732829, "ATIENDE": "ROSA LILIANA SULLON CASTILLO", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-03-31", "FECHA_REGISTRO": "2026-04-06", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error_Tipo Doc"}, {"NUMREG": 7, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5930, "ESTABLECIMIENTO": "ATE", "Id_Cita": 1388320562, "NRO_DOC": "94295595", "NUM_DOC_ATIENDE": 25732829, "ATIENDE": "ROSA LILIANA SULLON CASTILLO", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-04-07", "FECHA_REGISTRO": "2026-05-03", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 6, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5930, "ESTABLECIMIENTO": "ATE", "Id_Cita": 1388320507, "NRO_DOC": "94289972", "NUM_DOC_ATIENDE": 25732829, "ATIENDE": "ROSA LILIANA SULLON CASTILLO", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-04-07", "FECHA_REGISTRO": "2026-05-03", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 4, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5930, "ESTABLECIMIENTO": "ATE", "Id_Cita": 1388317869, "NRO_DOC": "94238710", "NUM_DOC_ATIENDE": 25732829, "ATIENDE": "ROSA LILIANA SULLON CASTILLO", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-04-06", "FECHA_REGISTRO": "2026-05-03", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 2, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5930, "ESTABLECIMIENTO": "ATE", "Id_Cita": 1388317676, "NRO_DOC": "94225476", "NUM_DOC_ATIENDE": 25732829, "ATIENDE": "ROSA LILIANA SULLON CASTILLO", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-04-06", "FECHA_REGISTRO": "2026-05-03", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 1, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5964, "ESTABLECIMIENTO": "EL BOSQUE", "Id_Cita": 1347481596, "NRO_DOC": "94052587", "NUM_DOC_ATIENDE": 72484856, "ATIENDE": "ALEJANDRA MELISSA PARRA CCORIMANYA", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-30", "FECHA_REGISTRO": "2026-02-05", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Tipo_diag"}, {"NUMREG": 8, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5964, "ESTABLECIMIENTO": "EL BOSQUE", "Id_Cita": 1357977072, "NRO_DOC": "94295589", "NUM_DOC_ATIENDE": 9735170, "ATIENDE": "YRMA DORIS MEDRANO LANAZCA", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-03-02", "FECHA_REGISTRO": "2026-03-02", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 11, "SERVICIO": 301201, "UPS": "CONSEJERIA", "RENIPRESS": 5962, "ESTABLECIMIENTO": "GUSTAVO LANATTA", "Id_Cita": 1345954408, "NRO_DOC": "94208227", "NUM_DOC_ATIENDE": 3236132, "ATIENDE": "ZYZY YASMINIA SILVA LABAN", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-20", "FECHA_REGISTRO": "2026-02-02", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 4, "SERVICIO": 301201, "UPS": "CONSEJERIA", "RENIPRESS": 5962, "ESTABLECIMIENTO": "GUSTAVO LANATTA", "Id_Cita": 1345951424, "NRO_DOC": "94186337", "NUM_DOC_ATIENDE": 3236132, "ATIENDE": "ZYZY YASMINIA SILVA LABAN", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-20", "FECHA_REGISTRO": "2026-02-02", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 3, "SERVICIO": 301201, "UPS": "CONSEJERIA", "RENIPRESS": 5962, "ESTABLECIMIENTO": "GUSTAVO LANATTA", "Id_Cita": 1345951162, "NRO_DOC": "94205502", "NUM_DOC_ATIENDE": 3236132, "ATIENDE": "ZYZY YASMINIA SILVA LABAN", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-20", "FECHA_REGISTRO": "2026-02-02", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 1, "SERVICIO": 301201, "UPS": "CONSEJERIA", "RENIPRESS": 5962, "ESTABLECIMIENTO": "GUSTAVO LANATTA", "Id_Cita": 1345948932, "NRO_DOC": "94196714", "NUM_DOC_ATIENDE": 3236132, "ATIENDE": "ZYZY YASMINIA SILVA LABAN", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-20", "FECHA_REGISTRO": "2026-02-02", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 7, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5962, "ESTABLECIMIENTO": "GUSTAVO LANATTA", "Id_Cita": 1346193386, "NRO_DOC": "94235442", "NUM_DOC_ATIENDE": 8888565, "ATIENDE": "RICARDO EDILBERTO MARIÑAS CORONADO", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-02-02", "FECHA_REGISTRO": "2026-02-02", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 1, "SERVICIO": 303713, "UPS": "ATENCION INTEGRAL DEL NINO", "RENIPRESS": 5962, "ESTABLECIMIENTO": "GUSTAVO LANATTA", "Id_Cita": 1388414522, "NRO_DOC": "94248598", "NUM_DOC_ATIENDE": 21861852, "ATIENDE": "ELIZABETH ROXANA PACHECO ATUNCAR", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-04-01", "FECHA_REGISTRO": "2026-05-04", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 11, "SERVICIO": 303101, "UPS": "NUTRICION", "RENIPRESS": 5929, "ESTABLECIMIENTO": "MICAELA BASTIDAS", "Id_Cita": 1380807180, "NRO_DOC": "94023407", "NUM_DOC_ATIENDE": 40512385, "ATIENDE": "MERLE QUISPE RAMOS", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-02-17", "FECHA_REGISTRO": "2026-04-20", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab"}, {"NUMREG": 1, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5929, "ESTABLECIMIENTO": "MICAELA BASTIDAS", "Id_Cita": 1353135356, "NRO_DOC": "94345287", "NUM_DOC_ATIENDE": 71962134, "ATIENDE": "MICHELLE ALEXANDRA MARIÑAS LUNA", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-02-19", "FECHA_REGISTRO": "2026-02-19", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 1, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5929, "ESTABLECIMIENTO": "MICAELA BASTIDAS", "Id_Cita": 1351439519, "NRO_DOC": "94317942", "NUM_DOC_ATIENDE": 71962134, "ATIENDE": "MICHELLE ALEXANDRA MARIÑAS LUNA", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-02-16", "FECHA_REGISTRO": "2026-02-16", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 5, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5966, "ESTABLECIMIENTO": "SAN FERNANDO", "Id_Cita": 1346661180, "NRO_DOC": "93977182", "NUM_DOC_ATIENDE": 21442014, "ATIENDE": "MANUEL FELIX CARRILLO MUÑANTE", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-27", "FECHA_REGISTRO": "2026-02-03", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab"}, {"NUMREG": 4, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5966, "ESTABLECIMIENTO": "SAN FERNANDO", "Id_Cita": 1346660271, "NRO_DOC": "94119771", "NUM_DOC_ATIENDE": 21442014, "ATIENDE": "MANUEL FELIX CARRILLO MUÑANTE", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-27", "FECHA_REGISTRO": "2026-02-03", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab"}, {"NUMREG": 18, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5966, "ESTABLECIMIENTO": "SAN FERNANDO", "Id_Cita": 1345890256, "NRO_DOC": "94101636", "NUM_DOC_ATIENDE": 43842296, "ATIENDE": "YERSIN HUANCA MAMANI", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-12", "FECHA_REGISTRO": "2026-02-02", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab"}, {"NUMREG": 1, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5966, "ESTABLECIMIENTO": "SAN FERNANDO", "Id_Cita": 1355843584, "NRO_DOC": "94333995", "NUM_DOC_ATIENDE": 44747631, "ATIENDE": "VERONICA NADIA CONCEPCION YANAC", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-02-25", "FECHA_REGISTRO": "2026-02-26", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 3, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5966, "ESTABLECIMIENTO": "SAN FERNANDO", "Id_Cita": 1365026237, "NRO_DOC": "94065172", "NUM_DOC_ATIENDE": 45099648, "ATIENDE": "IVAN CESAR HUAMAN ALVARADO", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-03-16", "FECHA_REGISTRO": "2026-03-17", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab"}, {"NUMREG": 4, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 6849, "ESTABLECIMIENTO": "TUPAC AMARU", "Id_Cita": 1342903503, "NRO_DOC": "94010845", "NUM_DOC_ATIENDE": 72884968, "ATIENDE": "SUE ANGIELUZ ALVINO RODRIGUEZ", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-20", "FECHA_REGISTRO": "2026-01-27", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab"}, {"NUMREG": 1, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 6849, "ESTABLECIMIENTO": "TUPAC AMARU", "Id_Cita": 1349814174, "NRO_DOC": "94036275", "NUM_DOC_ATIENDE": 72884968, "ATIENDE": "SUE ANGIELUZ ALVINO RODRIGUEZ", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-02-09", "FECHA_REGISTRO": "2026-02-11", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab"}, {"NUMREG": 22, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 28434, "ESTABLECIMIENTO": "SALAMANCA", "Id_Cita": 1348193945, "NRO_DOC": "94217456", "NUM_DOC_ATIENDE": 76578644, "ATIENDE": "LUIS MARTIN EXEBIO CESPEDES", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-02-04", "FECHA_REGISTRO": "2026-02-06", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 3, "SERVICIO": 302101, "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "RENIPRESS": 28434, "ESTABLECIMIENTO": "SALAMANCA", "Id_Cita": 1372729892, "NRO_DOC": "94080762", "NUM_DOC_ATIENDE": 10000425, "ATIENDE": "ROSARIO LILIANA ALARCON MENDEZ", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-03-26", "FECHA_REGISTRO": "2026-04-01", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Lab"}, {"NUMREG": 1, "SERVICIO": 302101, "UPS": "ATENCION EN SALUD FAMILIAR Y COMUNITARIA", "RENIPRESS": 28434, "ESTABLECIMIENTO": "SALAMANCA", "Id_Cita": 1372723691, "NRO_DOC": "94166416", "NUM_DOC_ATIENDE": 10000425, "ATIENDE": "ROSARIO LILIANA ALARCON MENDEZ", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-03-26", "FECHA_REGISTRO": "2026-04-01", "INDICADOR": "Recuperado", "ERROR": "Error Tipo_diag"}, {"NUMREG": 3, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5851, "ESTABLECIMIENTO": "FORTALEZA", "Id_Cita": 1366826306, "NRO_DOC": "94073373", "NUM_DOC_ATIENDE": 40178586, "ATIENDE": "KAREN FANNY SANCHEZ TORIBIO", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-23", "FECHA_REGISTRO": "2026-03-20", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error Tipo_diag"}, {"NUMREG": 15, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5851, "ESTABLECIMIENTO": "FORTALEZA", "Id_Cita": 1348024478, "NRO_DOC": "C01-00010568998", "NUM_DOC_ATIENDE": 45054933, "ATIENDE": "HECTOR ALEXANDER LLUEN LLUEN", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-01-06", "FECHA_REGISTRO": "2026-02-06", "INDICADOR": "Tratamiento Recuperativo", "ERROR": "Error_Tipo Doc"}, {"NUMREG": 9, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5851, "ESTABLECIMIENTO": "FORTALEZA", "Id_Cita": 1359614911, "NRO_DOC": "94283134", "NUM_DOC_ATIENDE": 9593447, "ATIENDE": "JESUS ELIAS HUAPAYA VILLEGAS", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-02-16", "FECHA_REGISTRO": "2026-03-04", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}, {"NUMREG": 1, "SERVICIO": 302303, "UPS": "MEDICINA GENERAL", "RENIPRESS": 5851, "ESTABLECIMIENTO": "FORTALEZA", "Id_Cita": 1380717264, "NRO_DOC": "94390543", "NUM_DOC_ATIENDE": 9593447, "ATIENDE": "JESUS ELIAS HUAPAYA VILLEGAS", "PROFESION": "PROFESION", "FECHA_ATENCION": "2026-04-20", "FECHA_REGISTRO": "2026-04-20", "INDICADOR": "Diagnostico de Anemia", "ERROR": "Error Lab"}], "summary": {"total_records": 35, "total_errors": 35, "total_prof": 23, "total_eess": 9, "total_error_types": 3}};
+let records = DATA.records;
+
+const fmt = n => new Intl.NumberFormat('es-PE').format(n || 0);
+const clean = v => (v === null || v === undefined ? '' : String(v));
+const colors = ['#38bdf8','#22c55e','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#eab308','#f97316','#ec4899','#60a5fa'];
+
+function uniqueValues(key) {
+  return [...new Set(records.map(r => clean(r[key])).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+}
+function populateSelect(id, key) {
+  const sel = document.getElementById(id);
+  uniqueValues(key).forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+populateSelect('fAtiende','ATIENDE');
+populateSelect('fEess','ESTABLECIMIENTO');
+populateSelect('fProf','PROFESION');
+
+['fAtiende','fEess','fProf','fSearch'].forEach(id => document.getElementById(id).addEventListener('input', render));
+
+function filtered() {
+  const a = document.getElementById('fAtiende').value;
+  const e = document.getElementById('fEess').value;
+  const p = document.getElementById('fProf').value;
+  const q = document.getElementById('fSearch').value.toLowerCase().trim();
+  return records.filter(r => {
+    const okA = !a || r.ATIENDE === a;
+    const okE = !e || r.ESTABLECIMIENTO === e;
+    const okP = !p || r.PROFESION === p;
+    const blob = Object.values(r).map(clean).join(' ').toLowerCase();
+    const okQ = !q || blob.includes(q);
+    return okA && okE && okP && okQ;
+  });
+}
+
+function groupBy(arr, key) {
+  const m = new Map();
+  arr.forEach(r => {
+    const k = clean(r[key]) || 'Sin dato';
+    m.set(k, (m.get(k)||0)+1);
+  });
+  return [...m.entries()].map(([name,total]) => ({name,total})).sort((x,y)=>y.total-x.total);
+}
+
+function renderBars(elId, data, maxItems=15) {
+  const el = document.getElementById(elId);
+  const max = Math.max(...data.map(d=>d.total),1);
+  el.innerHTML = data.slice(0,maxItems).map(d => `
+    <div class="barrow" title="${d.name}">
+      <div class="name">${escapeHtml(d.name)}</div>
+      <div class="track"><div class="fill" style="width:${(d.total/max)*100}%"></div></div>
+      <div class="num">${fmt(d.total)}</div>
+    </div>`).join('') || '<p style="color:var(--muted)">Sin datos para mostrar.</p>';
+}
+
+function renderDonut(data) {
+  const top = data.slice(0,10);
+  const total = top.reduce((a,b)=>a+b.total,0) || 1;
+  let angle = 0;
+  const stops = top.map((d,i) => {
+    const start = angle;
+    angle += d.total/total*360;
+    return `${colors[i%colors.length]} ${start}deg ${angle}deg`;
+  }).join(', ');
+  document.getElementById('donut').style.background = top.length ? `conic-gradient(${stops})` : '#102943';
+  document.getElementById('legendError').innerHTML = top.map((d,i)=>`
+    <div class="legendItem">
+      <span class="dot" style="background:${colors[i%colors.length]}"></span>
+      <span title="${d.name}">${escapeHtml(d.name.length>45 ? d.name.slice(0,45)+'...' : d.name)}</span>
+      <b>${fmt(d.total)}</b>
+    </div>`).join('') || '<p style="color:var(--muted)">Sin datos.</p>';
+}
+
+function renderTable(arr) {
+  const tbody = document.querySelector('#detailTable tbody');
+  tbody.innerHTML = arr.slice(0,500).map(r => `
+    <tr>
+      <td data-label="ATIENDE">${escapeHtml(r.ATIENDE)}</td>
+      <td data-label="DNI Atiende">${escapeHtml(r.NUM_DOC_ATIENDE)}</td>
+      <td data-label="EESS">${escapeHtml(r.ESTABLECIMIENTO)}</td>
+      <td data-label="Profesión">${escapeHtml(r.PROFESION)}</td>
+      <td data-label="Servicio">${escapeHtml(r.SERVICIO)}</td>
+      <td data-label="Fecha">${escapeHtml(r.FECHA_ATENCION)}</td>
+      <td data-label="Indicador">${escapeHtml(r.INDICADOR)}</td>
+      <td data-label="Error">${escapeHtml(r.ERROR)}</td>
+    </tr>`).join('');
+  document.getElementById('footerCount').textContent = `Mostrando ${fmt(Math.min(arr.length,500))} de ${fmt(arr.length)} registros filtrados.`;
+}
+
+function escapeHtml(s) {
+  return clean(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function render() {
+  const arr = filtered();
+  document.getElementById('kTotalBase').textContent = fmt(DATA.summary.total_records);
+  document.getElementById('kErrors').textContent = fmt(arr.length);
+  document.getElementById('kAtiende').textContent = fmt(new Set(arr.map(r=>r.ATIENDE).filter(Boolean)).size);
+  document.getElementById('kEess').textContent = fmt(new Set(arr.map(r=>r.ESTABLECIMIENTO).filter(Boolean)).size);
+  document.getElementById('kType').textContent = fmt(new Set(arr.map(r=>r.ERROR).filter(Boolean)).size);
+
+  renderBars('chartAtiende', groupBy(arr,'ATIENDE'), 20);
+  renderBars('chartEess', groupBy(arr,'ESTABLECIMIENTO'), 20);
+  renderBars('chartProf', groupBy(arr,'PROFESION'), 12);
+  renderDonut(groupBy(arr,'ERROR'));
+  renderTable(arr);
+}
+
+function resetFilters() {
+  ['fAtiende','fEess','fProf'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fSearch').value = '';
+  render();
+}
+
+function downloadCSV() {
+  const arr = filtered();
+  const cols = ['ATIENDE','NUM_DOC_ATIENDE','ESTABLECIMIENTO','PROFESION','SERVICIO','FECHA_ATENCION','INDICADOR','ERROR'];
+  const csv = [cols.join(',')].concat(arr.map(r => cols.map(c => `"${clean(r[c]).replaceAll('"','""')}"`).join(','))).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'vista_filtrada_errores.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+render();
+</script>
+</body>
+</html>
